@@ -1,0 +1,27 @@
+body {
+    background-color: #3a3d42;
+}
+
+.nav_color, .element_color {
+    background-color: #51575b;
+}
+.element_color_border{
+    border: 2px solid #3a3e41;
+}
+
+.element_color {
+    padding: 5px 20px;
+}
+
+.toastCss{
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    z-index: 1;
+}
+
+.btn_function{
+    width: 150px;
+    margin: 10px 0;
+    color: white;
+}
