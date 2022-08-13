@@ -3,6 +3,8 @@ package com.example.booklibrary.controllers;
 import com.example.booklibrary.domain.Book;
 import com.example.booklibrary.service.BookService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +22,8 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping("/all")
-    public ResponseEntity<List<Book>> findAllBooks(){
-        return new ResponseEntity<>(bookService.getAllBooks(), HttpStatus.OK);
+    public ResponseEntity<Page<Book>> findAllBooks(Pageable pageable){
+        return new ResponseEntity<>(bookService.getAllBooks(pageable), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")

@@ -6,7 +6,7 @@ import Button from "react-bootstrap/Button";
 import {faEdit, faList} from "@fortawesome/free-solid-svg-icons";
 import {Link, useParams} from "react-router-dom";
 import axios from "axios";
-import UpdateToast from "../../blocks/toasts/UpdateToast";
+import UpdateToast from "../../components/toasts/UpdateToast";
 
 export default function EditBookPage(props) {
 
@@ -30,26 +30,59 @@ export default function EditBookPage(props) {
     }, []);
 
     function findBook() {
-        axios.get("http://localhost:8080/book/" + id)
-            .then(res => {
-                setBook(res.data)
+        fetch("http://localhost:8080/book/" + id)
+            .then(response => response.json())
+            .then((book) => {
+                if (book)
+                    setBook(book)
             })
             .catch(error => console.error(error))
     }
 
+    // function findBook() {
+    //     axios.get("http://localhost:8080/book/" + id)
+    //         .then(res => {
+    //             setBook(res.data)
+    //         })
+    //         .catch(error => console.error(error))
+    // }
+
     function editBook(e) {
-        console.log(book)
-        axios.put("http://localhost:8080/book/update", book)
-            .then(res => {
-                console.log(res.data)
-                setShow(true)
-                setTimeout(() => {
-                        setShow(false)
-                    },
-                    3000)
+
+        const headers = new Headers()
+        headers.append('Content-Type', 'application/json')
+
+        fetch("http://localhost:8080/book/update", {
+            method: 'PUT',
+            body: JSON.stringify(book),
+            headers
+        }).then(response => response.json())
+            .then((book) => {
+                console.log(book)
+                if (book) {
+                    setShow(true)
+                    setTimeout(() => {
+                            setShow(false)
+                        },
+                        3000)
+                }
             })
             .catch(error => console.error(error))
     }
+
+    // function editBook(e) {
+    //     console.log(book)
+    //     axios.put("http://localhost:8080/book/update", book)
+    //         .then(res => {
+    //             console.log(res.data)
+    //             setShow(true)
+    //             setTimeout(() => {
+    //                     setShow(false)
+    //                 },
+    //                 3000)
+    //         })
+    //         .catch(error => console.error(error))
+    // }
 
     function changeBook(e) {
         setBook({...book, [e.target.name]: e.target.value})
@@ -59,8 +92,8 @@ export default function EditBookPage(props) {
         <div>
             <div style={{"display": show ? "block" : "none"}}>
                 <UpdateToast
-                    show = {show}
-                    message = {"Book update successfully!"}
+                    show={show}
+                    message={"Book update successfully!"}
                 />
             </div>
             <Card className="element_color_border element_color text-white">

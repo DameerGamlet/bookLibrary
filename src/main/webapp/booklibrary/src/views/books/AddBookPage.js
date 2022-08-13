@@ -4,8 +4,9 @@ import Button from "react-bootstrap/Button";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPlusSquare, faSave} from '@fortawesome/free-regular-svg-icons';
 import axios from "axios";
-import {faUndo} from "@fortawesome/free-solid-svg-icons";
-import SuccessToast from "../../blocks/toasts/SuccessToast";
+import {faList, faUndo} from "@fortawesome/free-solid-svg-icons";
+import SuccessToast from "../../components/toasts/SuccessToast";
+import {Link} from "react-router-dom";
 
 class AddBookPage extends Component {
 
@@ -23,13 +24,18 @@ class AddBookPage extends Component {
 
     addBook = (e) => {
         e.preventDefault()
-        let link = 'http://localhost:8080/book/create'
-        console.log(this.state)
-        axios.post(link, this.state)
-            .then(response => response.data)
-            .then(data => {
-                console.log(data)
-                if (data != null) {
+
+        const headers = new Headers()
+        headers.append('Content-Type', 'application/json')
+
+        fetch('http://localhost:8080/book/create', {
+            method: 'POST',
+            body: JSON.stringify(this.state),
+            headers
+        }).then(response => response.json())
+            .then((book) => {
+                console.log(book)
+                if (book != null) {
                     this.setState({"show": true})
                     setTimeout(() => {
                             this.setState({"show": false})
@@ -42,6 +48,28 @@ class AddBookPage extends Component {
             .catch(error => console.error(error))
         this.resetBook();
     }
+
+    // addBook = (e) => {
+    //     e.preventDefault()
+    //     let link = 'http://localhost:8080/book/create'
+    //     console.log(this.state)
+    //     axios.post(link, this.state)
+    //         .then(response => response.data)
+    //         .then(data => {
+    //             console.log(data)
+    //             if (data != null) {
+    //                 this.setState({"show": true})
+    //                 setTimeout(() => {
+    //                         this.setState({"show": false})
+    //                     },
+    //                     3000)
+    //             } else {
+    //                 this.setState({"show": false})
+    //             }
+    //         })
+    //         .catch(error => console.error(error))
+    //     this.resetBook();
+    // }
 
     bookChange = (e) => {
         this.setState({[e.target.name]: e.target.value})
@@ -65,8 +93,8 @@ class AddBookPage extends Component {
             <div>
                 <div style={{"display": this.state.show ? "block" : "none"}}>
                     <SuccessToast
-                        show = {this.state.show}
-                        message = {"Book added successfully!"}
+                        show={this.state.show}
+                        message={"Book added successfully!"}
                     />
                 </div>
                 <Card className="element_color_border element_color text-white">
@@ -121,12 +149,19 @@ class AddBookPage extends Component {
                         </Card.Body>
                         <Card.Footer style={{textAlign: "center"}}>
                             <Button variant="success" type="reset"
-                                    className="btn_function">
+                                    className="btn_function btn btn-sm">
                                 <FontAwesomeIcon icon={faUndo}/> &nbsp; &nbsp; Reset</Button>
                             &nbsp;&nbsp;&nbsp;&nbsp;
                             <Button variant="primary" type="submit"
-                                    className="btn_function">
+                                    className="btn_function btn btn-sm btn-outline-primary">
                                 <FontAwesomeIcon icon={faSave}/> &nbsp; &nbsp; Save</Button>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <Link to={"/books"}>
+                                <Button variant="primary" type="button"
+                                        className="btn_function btn btn-sm btn-outline-primary">
+                                    <FontAwesomeIcon icon={faList}/> &nbsp; Go to List
+                                </Button>
+                            </Link>
                         </Card.Footer>
                     </Form>
                 </Card>

@@ -1,34 +1,39 @@
 import './App.css';
-import MainPage from "./components/MainPage";
+import MainPage from "./views/MainPage";
 import {Route, Routes} from "react-router-dom";
-import Navigation from "./blocks/Navigation";
+import Navigation from "./components/Navigation";
 import React from 'react';
-import AddBookPage from "./components/books/AddBookPage";
-import Footer from "./blocks/Footer";
+import AddBookPage from "./views/books/AddBookPage";
+import Footer from "./components/Footer";
 import ImageUploader from "./temp/ImageUploader";
-import EditBookPage from "./components/books/EditBookPage";
-import InfoBookPage from "./components/books/InfoBookPage";
-import ListBookPage from "./components/books/ListBookPage";
-import UsersListPage from "./components/users/UsersListPage";
+import EditBookPage from "./views/books/EditBookPage";
+import InfoBookPage from "./views/books/InfoBookPage";
+import ListBookPage from "./views/books/ListBookPage";
+import UsersListPage from "./views/users/UsersListPage";
 
 function App() {
-  return (
-    <div>
-        <Navigation/>
-        <div className="container mt-4">
-            <Routes>
-                <Route path="/" element={<MainPage/>}/>
-                <Route path="/add_book" element={<AddBookPage/>}/>
-                <Route path="/books" element={<ListBookPage/>}/>
-                <Route path="/users" element={<UsersListPage/>}/>
-                <Route path="/books/edit/:id" element={<EditBookPage/>}/>
-                <Route path="/books/info/:id" element={<InfoBookPage/>}/>
-                <Route path="/x" element={<ImageUploader/>}/>
-            </Routes>
+
+    const heading = "Book library";
+    const desc = "This is a simple hero unit, a simple jumbotron-style component for calling extra" +
+        " attention to featured content or information.";
+
+    return (
+        <div>
+            <Navigation/>
+            <div className="container mt-4">
+                <Routes>
+                    <Route path="/" exact element={<MainPage heading={heading} desc={desc}/>}/>
+                    <Route path="/add_book" element={<AddBookPage/>}/>
+                    <Route path="/books" element={<ListBookPage/>}/>
+                    <Route path="/users" element={<UsersListPage/>}/>
+                    <Route path="/books/edit/:id" element={<EditBookPage/>}/>
+                    <Route path="/books/info/:id" element={<InfoBookPage/>}/>
+                    <Route path="/x" element={<ImageUploader/>}/>
+                </Routes>
+            </div>
+            <Footer/>
         </div>
-        <Footer/>
-    </div>
-  );
+    );
 }
 
 export default App;

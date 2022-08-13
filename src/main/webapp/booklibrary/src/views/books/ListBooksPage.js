@@ -4,7 +4,7 @@ import axios from 'axios';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEdit, faInfo, faList, faRemove} from "@fortawesome/free-solid-svg-icons";
 import Button from "react-bootstrap/Button";
-import DangerToast from "../../blocks/toasts/DangerToast";
+import DangerToast from "../../components/toasts/DangerToast";
 import {Link} from "react-router-dom";
 
 class ListBooksPage extends Component {
