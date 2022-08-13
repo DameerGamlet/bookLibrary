@@ -2,8 +2,11 @@ body {
     background-color: #3a3d42;
 }
 
-.nav_color, .element_color {
+.element_color {
     background-color: #51575b;
+}
+.nav_color {
+    background-color: #233c4d;
 }
 .element_color_border{
     border: 2px solid #3a3e41;
@@ -27,7 +30,7 @@ body {
 }
 
 .paginationPage{
-    width: 50px;
+    width: 60px;
     text-align: center;
     background: #0D6EFD;
     font-size: 17px;

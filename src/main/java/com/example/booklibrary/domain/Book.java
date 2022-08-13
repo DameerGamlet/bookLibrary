@@ -23,13 +23,15 @@ public class Book {
     private Long isbnNumber;
     private Double price;
     private String language;
+    private String genre;
 
-    public Book(String title, String author, String coverPhotoUrl, Long isbnNumber, Double price, String language) {
+    public Book(String title, String author, String coverPhotoUrl, Long isbnNumber, Double price, String language, String genre) {
         this.title = title;
         this.author = author;
         this.coverPhotoUrl = coverPhotoUrl;
         this.isbnNumber = isbnNumber;
         this.price = price;
         this.language = language;
+        this.genre = genre;
     }
 }

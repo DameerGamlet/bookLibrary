@@ -5,7 +5,6 @@ import Navigation from "./components/Navigation";
 import React from 'react';
 import AddBookPage from "./views/books/AddBookPage";
 import Footer from "./components/Footer";
-import ImageUploader from "./temp/ImageUploader";
 import EditBookPage from "./views/books/EditBookPage";
 import InfoBookPage from "./views/books/InfoBookPage";
 import ListBookPage from "./views/books/ListBookPage";
@@ -28,7 +27,6 @@ function App() {
                     <Route path="/users" element={<UsersListPage/>}/>
                     <Route path="/books/edit/:id" element={<EditBookPage/>}/>
                     <Route path="/books/info/:id" element={<InfoBookPage/>}/>
-                    <Route path="/x" element={<ImageUploader/>}/>
                 </Routes>
             </div>
             <Footer/>

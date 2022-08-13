@@ -3,10 +3,10 @@ import {Card, Col, Form, Row} from "react-bootstrap";
 import Button from "react-bootstrap/Button";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPlusSquare, faSave} from '@fortawesome/free-regular-svg-icons';
-import axios from "axios";
 import {faList, faUndo} from "@fortawesome/free-solid-svg-icons";
 import SuccessToast from "../../components/toasts/SuccessToast";
 import {Link} from "react-router-dom";
+import axios from "axios";
 
 class AddBookPage extends Component {
 
@@ -14,12 +14,54 @@ class AddBookPage extends Component {
         super(props)
 
         this.state = this.initialState
-        this.file = ""
         this.state.show = false
+        this.state = {
+            genres: [],
+            languages: []
+        }
     }
 
     initialState = {
-        title: '', author: '', coverPhotoUrl: '', isbnNumber: '', price: '', language: ''
+        title: '', author: '', coverPhotoUrl: '', isbnNumber: '', price: '', language: '', genre: ''
+    }
+
+    componentDidMount() {
+        this.initAllGenre();
+        this.initAllLanguage();
+    }
+
+    initAllLanguage() {
+        axios.get('http://localhost:8080/languages')
+            .then(response => response.data)
+            .then((data) => {
+                this.setState({
+                    languages: [{
+                        value: '', display: "Select language"
+                    }]
+                        .concat(data.map(l => {
+                            return {
+                                value: l, display: l
+                            }
+                        }))
+                })
+            })
+    }
+
+    initAllGenre() {
+        axios.get('http://localhost:8080/genres')
+            .then(response => response.data)
+            .then((data) => {
+                this.setState({
+                    genres: [{
+                        value: '', display: 'Select a genre'
+                    }]
+                        .concat(data.map(g => {
+                            return {
+                                value: g, display: g
+                            }
+                        }))
+                })
+            })
     }
 
     addBook = (e) => {
@@ -29,18 +71,15 @@ class AddBookPage extends Component {
         headers.append('Content-Type', 'application/json')
 
         fetch('http://localhost:8080/book/create', {
-            method: 'POST',
-            body: JSON.stringify(this.state),
-            headers
+            method: 'POST', body: JSON.stringify(this.state), headers
         }).then(response => response.json())
             .then((book) => {
                 console.log(book)
                 if (book != null) {
                     this.setState({"show": true})
                     setTimeout(() => {
-                            this.setState({"show": false})
-                        },
-                        3000)
+                        this.setState({"show": false})
+                    }, 3000)
                 } else {
                     this.setState({"show": false})
                 }
@@ -48,28 +87,6 @@ class AddBookPage extends Component {
             .catch(error => console.error(error))
         this.resetBook();
     }
-
-    // addBook = (e) => {
-    //     e.preventDefault()
-    //     let link = 'http://localhost:8080/book/create'
-    //     console.log(this.state)
-    //     axios.post(link, this.state)
-    //         .then(response => response.data)
-    //         .then(data => {
-    //             console.log(data)
-    //             if (data != null) {
-    //                 this.setState({"show": true})
-    //                 setTimeout(() => {
-    //                         this.setState({"show": false})
-    //                     },
-    //                     3000)
-    //             } else {
-    //                 this.setState({"show": false})
-    //             }
-    //         })
-    //         .catch(error => console.error(error))
-    //     this.resetBook();
-    // }
 
     bookChange = (e) => {
         this.setState({[e.target.name]: e.target.value})
@@ -79,18 +96,22 @@ class AddBookPage extends Component {
         this.setState(() => this.initialState)
     }
 
+    selectLanguage = (e) => {
+        console.log(e.target.value)
+        this.setState({language: e.target.value})
+    }
+
+    selectGenre = (e) => {
+        console.log(e.target.value)
+        this.setState({genre: e.target.value})
+    }
+
     render() {
         const {
-            title,
-            author,
-            coverPhotoUrl,
-            isbnNumber,
-            price,
-            language
+            title, author, coverPhotoUrl, isbnNumber, price
         } = this.state
 
-        return (
-            <div>
+        return (<div>
                 <div style={{"display": this.state.show ? "block" : "none"}}>
                     <SuccessToast
                         show={this.state.show}
@@ -123,7 +144,6 @@ class AddBookPage extends Component {
                                     <Form.Control type="text" name="coverPhotoUrl" placeholder="Image URL"
                                                   value={coverPhotoUrl} autoComplete="off"
                                                   onChange={this.bookChange}/>
-                                    {/*<Form.Control type="file" name="file"/>*/}
                                 </Form.Group>
                                 <Form.Group as={Col} className="mb-3" controlId="formGridIsbnNumber">
                                     <Form.Label>ISBN Number</Form.Label>
@@ -140,10 +160,22 @@ class AddBookPage extends Component {
                                                   onChange={this.bookChange}/>
                                 </Form.Group>
                                 <Form.Group as={Col} className="mb-3" controlId="formGridLanguage">
-                                    <Form.Label>Language</Form.Label>
-                                    <Form.Control type="text" name="language" placeholder="Language"
-                                                  value={language} autoComplete="off"
-                                                  onChange={this.bookChange}/>
+                                    <Form.Label>Language ({this.state.languages.length})</Form.Label>
+                                    <Form.Select name="language" onChange={this.selectLanguage}>
+                                        {this.state.languages.map(lang => <option key={lang.value} value={lang.value}>
+                                            {lang.display}
+                                        </option>)}
+                                    </Form.Select>
+                                </Form.Group>
+                                <Form.Group as={Col} className="mb-3" controlId="formGridLanguage">
+                                    <Form.Label>Genre ({this.state.genres.length})</Form.Label>
+                                    <Form.Select name="genre" onChange={this.selectGenre}>
+                                        {this.state.genres.map((g) =>
+                                            <option key={g.display} value={g.display}>
+                                                {g.display}
+                                            </option>
+                                        )}
+                                    </Form.Select>
                                 </Form.Group>
                             </Row>
                         </Card.Body>
@@ -165,8 +197,7 @@ class AddBookPage extends Component {
                         </Card.Footer>
                     </Form>
                 </Card>
-            </div>
-        );
+            </div>);
     }
 }
 

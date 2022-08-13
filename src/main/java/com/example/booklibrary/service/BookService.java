@@ -21,6 +21,9 @@ public class BookService {
     public Page<Book> getAllBooks(Pageable pageable) {
         return bookRepo.findAll(pageable);
     }
+    public Page<Book> getAllBooks(Pageable pageable, String searchText) {
+        return bookRepo.findAll(pageable, searchText);
+    }
 
     public Book getOneBook(Long id) {
         return bookRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Not found book by id: " + id));
@@ -38,7 +41,7 @@ public class BookService {
 //            System.out.println(faker.name().fullName() + " (" + faker.book().title() + " ) ");
 //            Random rnd = new Random();
 //            int n = 10000000 + rnd.nextInt(90000000);
-//            List<String> countries = List.of(
+//            List<String> languages = List.of(
 //                    "Chinese", "English", "English", "English", "English", "English", "English", "English",
 //                    "Italian", "Japanese", "Korean", "German", "Russian", "Russian", "Russian", "Swedish", "Turkmen",
 //                    "Ukrainian"
@@ -62,7 +65,8 @@ public class BookService {
 //                    images.get(rnd.nextInt(images.size() - 1)) + "",
 //                    10000000 + rnd.nextLong(90000000),
 //                    1 + rnd.nextInt(1000) + 0.99,
-//                    countries.get(rnd.nextInt(countries.size() - 1)) + ""
+//                    languages.get(rnd.nextInt(languages.size() - 1)) + "",
+//                    faker.book().genre()
 //            );
 //            System.out.println(i + ": " + book);
 //            bookList.add(book);

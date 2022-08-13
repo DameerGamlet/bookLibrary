@@ -5,8 +5,8 @@ import {faPlusSquare} from "@fortawesome/free-regular-svg-icons";
 import Button from "react-bootstrap/Button";
 import {faEdit, faList} from "@fortawesome/free-solid-svg-icons";
 import {Link, useParams} from "react-router-dom";
-import axios from "axios";
 import UpdateToast from "../../components/toasts/UpdateToast";
+import axios from "axios";
 
 export default function EditBookPage(props) {
 
@@ -19,15 +19,22 @@ export default function EditBookPage(props) {
             coverPhotoUrl: "",
             isbnNumber: "",
             price: "",
-            language: ""
+            language: "",
+            genre: ""
         }
     )
+    const [languages, setLanguages] = useState([{}])
+    const [genres, setGenres] = useState([{}])
     const [show, setShow] = useState(false)
-
 
     useEffect(() => {
         findBook()
     }, []);
+
+    useEffect(() => {
+        initAllLanguage()
+        initAllGenre()
+    }, [book]);
 
     function findBook() {
         fetch("http://localhost:8080/book/" + id)
@@ -39,16 +46,33 @@ export default function EditBookPage(props) {
             .catch(error => console.error(error))
     }
 
-    // function findBook() {
-    //     axios.get("http://localhost:8080/book/" + id)
-    //         .then(res => {
-    //             setBook(res.data)
-    //         })
-    //         .catch(error => console.error(error))
-    // }
+    function initAllLanguage() {
+        axios.get('http://localhost:8080/languages')
+            .then(response => response.data)
+            .then((data) => {
+                setLanguages(
+                    [{value: book.language, display: book.language}]
+                        .concat(data.map(l => {
+                            return {value: l, display: l}
+                        }))
+                )
+            })
+    }
+
+    function initAllGenre() {
+        axios.get('http://localhost:8080/genres')
+            .then(response => response.data)
+            .then((data) => {
+                setGenres(
+                    [{value: book.genre, display: book.genre}]
+                        .concat(data.map(g => {
+                            return {value: g, display: g}
+                        }))
+                )
+            })
+    }
 
     function editBook(e) {
-
         const headers = new Headers()
         headers.append('Content-Type', 'application/json')
 
@@ -69,20 +93,6 @@ export default function EditBookPage(props) {
             })
             .catch(error => console.error(error))
     }
-
-    // function editBook(e) {
-    //     console.log(book)
-    //     axios.put("http://localhost:8080/book/update", book)
-    //         .then(res => {
-    //             console.log(res.data)
-    //             setShow(true)
-    //             setTimeout(() => {
-    //                     setShow(false)
-    //                 },
-    //                 3000)
-    //         })
-    //         .catch(error => console.error(error))
-    // }
 
     function changeBook(e) {
         setBook({...book, [e.target.name]: e.target.value})
@@ -143,11 +153,23 @@ export default function EditBookPage(props) {
                                               autoComplete="off"/>
                             </Form.Group>
                             <Form.Group as={Col} className="mb-3" controlId="formGridLanguage">
-                                <Form.Label>Language</Form.Label>
-                                <Form.Control type="text" name="language" placeholder="Language"
-                                              defaultValue={book.language}
-                                              onChange={(e) => changeBook(e)}
-                                              autoComplete="off"/>
+                                <Form.Label>Language ({languages.length})</Form.Label>
+                                <Form.Select name="language" onChange={(e) => changeBook(e)}>
+                                    {languages.map(lang =>
+                                        <option key={lang.value} value={lang.value}>
+                                            {lang.display}
+                                        </option>)}
+                                </Form.Select>
+                            </Form.Group>
+                            <Form.Group as={Col} className="mb-3" controlId="formGridLanguage">
+                                <Form.Label>Genre ({genres.length})</Form.Label>
+                                <Form.Select name="genre" onChange={(e) => changeBook(e)}>
+                                    {genres.map((g) =>
+                                        <option key={g.display} value={g.display}>
+                                            {g.display}
+                                        </option>
+                                    )}
+                                </Form.Select>
                             </Form.Group>
                         </Row>
                     </Card.Body>

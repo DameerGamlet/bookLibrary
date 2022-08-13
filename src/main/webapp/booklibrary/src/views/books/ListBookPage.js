@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {ButtonGroup, Card, Col, Form, Image, Pagination, Table} from "react-bootstrap";
+import {ButtonGroup, Card, Col, Form, Image, Pagination, Row, Table} from "react-bootstrap";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEdit, faInfo, faList, faRemove} from "@fortawesome/free-solid-svg-icons";
 import {useNavigate} from "react-router-dom";
@@ -12,42 +12,44 @@ function ListBookPage(props) {
     const navigate = useNavigate()
     const [show, setShow] = useState(false)
 
-    const booksPerPage = 5
+    const [booksPerPage, setBooksPerPage] = useState(5)
     const [currentPage, setCurrentPage] = useState(1)
     const [totalElement, setTotalElement] = useState(0)
     const [totalPages, setTotalPages] = useState(0)
 
-    useEffect(() => {
-        findAllBooks(currentPage)
-    }, []);
+    const [sortBy, setSortBy] = useState("id")
+    const [sortDir, setSortDir] = useState("asc")
+
+    const [search, setSearch] = useState("")
+    const [searchAction, setSearchAction] = useState(false)
 
     useEffect(() => {
-        findAllBooks(currentPage)
-    }, [currentPage]);
+        console.log("searchAction: " + searchAction)
+        if(!searchAction){
+            findAllBooks(currentPage)
+        } else {
+            searchData(currentPage)
+        }
+    }, [sortBy, sortDir, booksPerPage]);
 
     function findAllBooks(currentPage) {
+        setSearchAction(false)
         currentPage--
-        fetch('http://localhost:8080/book/all?page=' + currentPage
-            + '&size=' + booksPerPage)
+        let link = 'http://localhost:8080/book/all?'
+            + 'pageNumber=' + currentPage
+            + '&pageSize=' + booksPerPage
+            + '&sortBy=' + sortBy
+            + '&sortDir=' + sortDir
+        console.log(link)
+        fetch(link)
             .then(response => response.json())
             .then((allBooks) => {
+                console.log(allBooks.content)
                 setBooks(allBooks.content)
                 setTotalElement(allBooks.totalElements)
                 setTotalPages(allBooks.totalPages)
             })
     }
-
-
-    // function findAllBooks() {
-    //     axios.get('http://localhost:8080/book/all')
-    //         .then(response => {
-    //             setBooks(response.data)
-    //             console.log(response.data)
-    //             console.log("count books: " + books.length)
-    //         })
-    //     console.log("books")
-    //     console.log(books)
-    // }
 
     function deleteBook(id) {
         fetch('http://localhost:8080/book/delete/' + id, {
@@ -56,8 +58,8 @@ function ListBookPage(props) {
             .then((book) => {
                 if (book) {
                     console.log("Successfully deleted book")
-                    findAllBooks();
                     setShow(true)
+                    selectActionShow(currentPage)
                     setTimeout(() => {
                             setShow(false)
                         },
@@ -67,35 +69,106 @@ function ListBookPage(props) {
             .catch(error => console.error(error))
     }
 
-    function firstPage  ()  {
-        if(currentPage !== 1){
+    function selectActionShow(value) {
+        console.log("SELECT")
+        if (!searchAction) {
+            findAllBooks(value)
+        } else {
+            searchData(value)
+        }
+    }
+
+    function firstPage() {
+        if (currentPage !== 1) {
             setCurrentPage(1)
+            selectActionShow(1)
         }
     }
 
-    function  prevPage () {
-        if(currentPage !== 1){
-            setCurrentPage(currentPage - 1)
+    function prevPage() {
+        if (currentPage !== 1) {
+            let value = currentPage - 1
+            setCurrentPage(value)
+            selectActionShow(value)
         }
     }
 
-    function  nextPage () {
-        if(currentPage !== totalPages){
-            setCurrentPage(currentPage + 1)
+    function nextPage() {
+        if (currentPage !== totalPages) {
+            let value = currentPage + 1
+            setCurrentPage(value)
+            selectActionShow(value)
         }
     }
 
-    function lastPage () {
-        if(currentPage !== totalPages){
+    function lastPage() {
+        if (currentPage !== totalPages) {
             setCurrentPage(totalPages)
+            selectActionShow(totalPages)
         }
     }
 
-    function changePage (e) {
+    function changePage(e) {
         let value = parseInt(e.target.value)
-        if(value > 0 && value <= totalPages){
+        selectActionShow(value)
+
+        if (value > 0 && value <= totalPages) {
             setCurrentPage(value)
         }
+    }
+
+    function changeSortBy(e) {
+        console.log("Sort by " + e.target.value)
+        setSortBy(e.target.value)
+        selectActionShow(currentPage)
+    }
+
+    function changeSortDir(e) {
+        console.log("Sort dir " + e.target.value)
+        setSortDir(e.target.value)
+        selectActionShow(currentPage)
+    }
+
+    function changeCountElementRepPage(e) {
+        let value = parseInt(e.target.value)
+        console.log("Sort by " + value)
+        setBooksPerPage(value)
+        setCurrentPage(1)
+        selectActionShow(currentPage)
+    }
+
+    function changeSearch(e) {
+        setSearch(e.target.value)
+    }
+
+    function searchDataAction(){
+        setCurrentPage(1)
+        searchData(1)
+    }
+
+    function searchData(currentPage) {
+        setSearchAction(true)
+        currentPage -= 1
+        let link = 'http://localhost:8080/book/search/' + search
+            + '?pageNumber=' + currentPage
+            + '&pageSize=' + booksPerPage
+            + '&sortBy=' + sortBy
+            + '&sortDir=' + sortDir
+        console.log(link)
+        fetch(link)
+            .then(response => response.json())
+            .then((allBooks) => {
+                console.log(allBooks.content)
+                setBooks(allBooks.content)
+                setTotalElement(allBooks.totalElements)
+                setTotalPages(allBooks.totalPages)
+            })
+    }
+
+    function resetData() {
+        setSearch("")
+        setCurrentPage(1)
+        findAllBooks(currentPage)
     }
 
     return (
@@ -106,9 +179,64 @@ function ListBookPage(props) {
                     message={"Book deleted successfully!"}
                 />
             </div>
-            <Card className="element_color_border element_color text-white">
+            <Card className="element_color_border element_color text-white" style={{marginBottom: "100px"}}>
                 <Card.Header>
-                    <h4><FontAwesomeIcon icon={faList}/> Book List ({totalElement} count)</h4>
+                    <Row>
+                        <Col sm={4}>
+                            <h4><FontAwesomeIcon icon={faList}/> Book List ({totalElement} count)</h4>
+                        </Col>
+                        <Col sm={8}>
+                            <Row>
+                                <Col sm={2}>
+                                    Sorted by
+                                    <Form.Select size="sm" onChange={(e) => changeSortBy(e)}>
+                                        <option value="id">Not Sorted</option>
+                                        <option value="title">Title</option>
+                                        <option value="author">Author</option>
+                                        <option value="price">Price</option>
+                                        <option value="language">Language</option>
+                                    </Form.Select>
+                                </Col>
+                                <Col sm={2}>
+                                    Sorted dir
+                                    <Form.Select size="sm" onChange={(e) => changeSortDir(e)}>
+                                        <option value="asc">by asc</option>
+                                        <option value="dsc">by dsc</option>
+                                    </Form.Select>
+                                </Col>
+                                <Col sm={2}>
+                                    Show by
+                                    <Form.Select size="sm" onChange={(e) => changeCountElementRepPage(e)}>
+                                        <option value="5">show by 5</option>
+                                        <option value="10">show by 10</option>
+                                        <option value="25">show by 25</option>
+                                        <option value="100">show by 100</option>
+                                    </Form.Select>
+                                </Col>
+                                <Col>
+                                    Search
+                                    <Form className="d-flex justify-content-end end-0">
+                                        <Form.Control
+                                            style={{height: "32px"}}
+                                            type="search"
+                                            onChange={changeSearch}
+                                            value={search}
+                                            placeholder="Search"
+                                            className="me-2"
+                                            aria-label="Search"
+                                        />
+                                        <Button variant="btn btn-outline-light"
+                                                onClick={() => searchDataAction()}
+                                                style={{height: "32px"}}>Search</Button>
+
+                                        <Button variant="btn btn-outline-light"
+                                                onClick={() => resetData()}
+                                                style={{height: "32px"}}>Reset</Button>
+                                    </Form>
+                                </Col>
+                            </Row>
+                        </Col>
+                    </Row>
                 </Card.Header>
                 <Card.Body>
                     <Table bordered className="text-white">
@@ -120,6 +248,7 @@ function ListBookPage(props) {
                             <th>ISBN Number</th>
                             <th>Price</th>
                             <th>Language</th>
+                            <th>Genre</th>
                             <th width="100px">Action</th>
                         </tr>
                         </thead>
@@ -142,6 +271,7 @@ function ListBookPage(props) {
                                         <td>{b.isbnNumber}</td>
                                         <td>{b.price} $</td>
                                         <td>{b.language}</td>
+                                        <td>{b.genre}</td>
                                         <td>
                                             <ButtonGroup>
                                                 <Button className="btn btn-sm btn-outline-light"
