@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Card, Col, Form, Row} from "react-bootstrap";
+import {Card, Col, Form, Image, InputGroup, Row} from "react-bootstrap";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPlusSquare} from "@fortawesome/free-regular-svg-icons";
 import Button from "react-bootstrap/Button";
@@ -7,22 +7,13 @@ import {faEdit, faList} from "@fortawesome/free-solid-svg-icons";
 import {Link, useParams} from "react-router-dom";
 import UpdateToast from "../../components/toasts/UpdateToast";
 import axios from "axios";
+import {fetchBook, saveBook, updateBook} from "../../services";
+import {connect} from "react-redux";
 
-export default function EditBookPage(props) {
+function EditBookPage(props) {
 
     const {id} = useParams()
-    const [book, setBook] = useState(
-        {
-            id: 0,
-            title: "",
-            author: "",
-            coverPhotoUrl: "",
-            isbnNumber: "",
-            price: "",
-            language: "",
-            genre: ""
-        }
-    )
+    const [book, setBook] = useState({})
     const [languages, setLanguages] = useState([{}])
     const [genres, setGenres] = useState([{}])
     const [show, setShow] = useState(false)
@@ -32,9 +23,21 @@ export default function EditBookPage(props) {
     }, []);
 
     useEffect(() => {
+    }, [book]);
+
+    useEffect(() => {
         initAllLanguage()
         initAllGenre()
     }, [book]);
+
+    // function findBook() {
+    //     props.fetchBook(id);
+    //     let book_ = props.bookObject.book;
+    //     console.log(book_)
+    //     if (book_ != null) {
+    //         setBook(book_)
+    //     }
+    // }
 
     function findBook() {
         fetch("http://localhost:8080/book/" + id)
@@ -51,7 +54,7 @@ export default function EditBookPage(props) {
             .then(response => response.data)
             .then((data) => {
                 setLanguages(
-                    [{value: book.language, display: book.language}]
+                    [{value: '', display: book.language}]
                         .concat(data.map(l => {
                             return {value: l, display: l}
                         }))
@@ -64,7 +67,7 @@ export default function EditBookPage(props) {
             .then(response => response.data)
             .then((data) => {
                 setGenres(
-                    [{value: book.genre, display: book.genre}]
+                    [{value: '', display: book.genre}]
                         .concat(data.map(g => {
                             return {value: g, display: g}
                         }))
@@ -73,25 +76,17 @@ export default function EditBookPage(props) {
     }
 
     function editBook(e) {
-        const headers = new Headers()
-        headers.append('Content-Type', 'application/json')
+        console.log(book)
 
-        fetch("http://localhost:8080/book/update", {
-            method: 'PUT',
-            body: JSON.stringify(book),
-            headers
-        }).then(response => response.json())
-            .then((book) => {
-                console.log(book)
-                if (book) {
-                    setShow(true)
-                    setTimeout(() => {
-                            setShow(false)
-                        },
-                        3000)
-                }
-            })
-            .catch(error => console.error(error))
+        props.updateBook(book)
+
+        if (props.updateBookObject.book != null) {
+            setShow(true)
+            setTimeout(() => {
+                    setShow(false)
+                },
+                3000)
+        }
     }
 
     function changeBook(e) {
@@ -131,10 +126,15 @@ export default function EditBookPage(props) {
                         <Row>
                             <Form.Group as={Col} className="mb-3" controlId="formGridCoverPhotoUrl">
                                 <Form.Label>Image URL</Form.Label>
-                                <Form.Control type="text" name="coverPhotoUrl" placeholder="Image URL"
-                                              defaultValue={book.coverPhotoUrl}
-                                              onChange={(e) => changeBook(e)}
-                                              autoComplete="off"/>
+                                <InputGroup>
+                                    <Form.Control type="text" name="coverPhotoUrl" placeholder="Image URL"
+                                                  defaultValue={book.coverPhotoUrl}
+                                                  onChange={(e) => changeBook(e)}
+                                                  autoComplete="off"/>
+                                    {book.coverPhotoUrl !== '' &&
+                                        <Image src={book.coverPhotoUrl} rounded width="40px"/>
+                                    }
+                                </InputGroup>
                             </Form.Group>
                             <Form.Group as={Col} className="mb-3" controlId="formGridIsbnNumber">
                                 <Form.Label>ISBN Number</Form.Label>
@@ -155,17 +155,19 @@ export default function EditBookPage(props) {
                             <Form.Group as={Col} className="mb-3" controlId="formGridLanguage">
                                 <Form.Label>Language ({languages.length})</Form.Label>
                                 <Form.Select name="language" onChange={(e) => changeBook(e)}>
-                                    {languages.map(lang =>
-                                        <option key={lang.value} value={lang.value}>
+                                    {languages.map((lang, pos) =>
+                                        lang.value !== book.language &&
+                                        <option key={pos} value={lang.value}>
                                             {lang.display}
-                                        </option>)}
+                                        </option>
+                                    )}
                                 </Form.Select>
                             </Form.Group>
                             <Form.Group as={Col} className="mb-3" controlId="formGridLanguage">
                                 <Form.Label>Genre ({genres.length})</Form.Label>
                                 <Form.Select name="genre" onChange={(e) => changeBook(e)}>
-                                    {genres.map((g) =>
-                                        <option key={g.display} value={g.display}>
+                                    {genres.map((g, pos) =>
+                                        <option key={pos} value={g.value}>
                                             {g.display}
                                         </option>
                                     )}
@@ -190,3 +192,21 @@ export default function EditBookPage(props) {
         </div>
     );
 }
+
+const mapStateToProps = function (state) {
+    return {
+        saveBookObject: state.book,
+        bookObject: state.book,
+        updateBookObject: state.book
+    }
+}
+
+const mapDispatchToProps = function (dispatch) {
+    return {
+        saveBook: (book) => dispatch(saveBook(book)),
+        fetchBook: (id) => dispatch(fetchBook(id)),
+        updateBook: (book) => dispatch(updateBook(book))
+    }
+}
+// export default EditBookPage;
+export default connect(mapStateToProps, mapDispatchToProps)(EditBookPage);

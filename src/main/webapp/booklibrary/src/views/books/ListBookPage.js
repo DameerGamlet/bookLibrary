@@ -5,6 +5,8 @@ import {faEdit, faInfo, faList, faRemove} from "@fortawesome/free-solid-svg-icon
 import {useNavigate} from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import DangerToast from "../../components/toasts/DangerToast";
+import {deleteBook} from "../../services";
+import {connect} from "react-redux";
 
 function ListBookPage(props) {
 
@@ -18,14 +20,14 @@ function ListBookPage(props) {
     const [totalPages, setTotalPages] = useState(0)
 
     const [sortBy, setSortBy] = useState("id")
-    const [sortDir, setSortDir] = useState("asc")
+    const [sortDir, setSortDir] = useState("dsc")
 
     const [search, setSearch] = useState("")
     const [searchAction, setSearchAction] = useState(false)
 
     useEffect(() => {
         console.log("searchAction: " + searchAction)
-        if(!searchAction){
+        if (!searchAction) {
             findAllBooks(currentPage)
         } else {
             searchData(currentPage)
@@ -52,21 +54,18 @@ function ListBookPage(props) {
     }
 
     function deleteBook(id) {
-        fetch('http://localhost:8080/book/delete/' + id, {
-            method: "DELETE"
-        })
-            .then((book) => {
-                if (book) {
-                    console.log("Successfully deleted book")
-                    setShow(true)
-                    selectActionShow(currentPage)
-                    setTimeout(() => {
-                            setShow(false)
-                        },
-                        3000)
-                }
-            })
-            .catch(error => console.error(error))
+        props.deleteBook(id);
+        setTimeout(() => {
+            if (props.bookObject.book != null) {
+                console.log("Successfully deleted book")
+                setShow(true)
+                selectActionShow(currentPage)
+                setTimeout(() => {
+                        setShow(false)
+                    },
+                    3000)
+            }
+        }, 100)
     }
 
     function selectActionShow(value) {
@@ -141,7 +140,7 @@ function ListBookPage(props) {
         setSearch(e.target.value)
     }
 
-    function searchDataAction(){
+    function searchDataAction() {
         setCurrentPage(1)
         searchData(1)
     }
@@ -200,8 +199,8 @@ function ListBookPage(props) {
                                 <Col sm={2}>
                                     Sorted dir
                                     <Form.Select size="sm" onChange={(e) => changeSortDir(e)}>
-                                        <option value="asc">by asc</option>
                                         <option value="dsc">by dsc</option>
+                                        <option value="asc">by asc</option>
                                     </Form.Select>
                                 </Col>
                                 <Col sm={2}>
@@ -255,10 +254,8 @@ function ListBookPage(props) {
                         <tbody>
                         {
                             books.length === 1 ?
-                                <tr>
-                                    <td align="center">
-                                        No have books !!
-                                    </td>
+                                <tr align='center'>
+                                    <td colSpan="6">No Books Available</td>
                                 </tr>
                                 :
                                 books.map((b) => (
@@ -323,4 +320,16 @@ function ListBookPage(props) {
     );
 }
 
-export default ListBookPage;
+const mapStateToProps = state => {
+    return {
+        bookObject: state.book
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        deleteBook: (bookId) => dispatch(deleteBook(bookId))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ListBookPage);

@@ -47,6 +47,10 @@ function InfoBookPage(props) {
                                 <td><b>Language</b></td>
                                 <td>{location.state.language}</td>
                             </tr>
+                            <tr>
+                                <td><b>Genre</b></td>
+                                <td>{location.state.genre}</td>
+                            </tr>
                             </thead>
                         </Table>
 
